@@ -18,14 +18,14 @@ while True:
     req, addr = s.recvfrom(1024)
     key, = reqHdr.unpack(req)
 
-    print addr, "-> Req(%d),"%key,
+    print(addr, "-> Req(%d),"%key)
 
     if key in store:
         valid, value = 1, store[key]
-        print "<- Res(%d)" % value
+        print("<- Res(%d)" % value)
     else:
         valid, value = 0, 0
-        print "<- Res(NOTFOUND)"
+        print("<- Res(NOTFOUND)")
 
 
     res = resHdr.pack(key, valid, value)

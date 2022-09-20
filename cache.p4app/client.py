@@ -6,7 +6,7 @@ from cache_protocol import *
 
 
 if len(sys.argv) != 3:
-    print "Usage: %s HOST KEY" % sys.argv[0]
+    print("Usage: %s HOST KEY" % sys.argv[0])
     sys.exit(1)
 
 host = sys.argv[1]
@@ -27,6 +27,6 @@ key2, valid, value = resHdr.unpack(res)
 assert key2 == key
 
 if valid:
-    print value
+    print(value)
 else:
-    print "NOTFOUND"
+    print("NOTFOUND")
