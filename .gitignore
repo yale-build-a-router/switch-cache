@@ -1,6 +1,7 @@
 # Python byte code
 *.pyc
 *.pyo
+__pycache__/
 
 # Emacs
 *~
