@@ -4,9 +4,10 @@
 
 const bit<8>  UDP_PROTOCOL = 0x11;
 const bit<16> TYPE_IPV4 = 0x800;
-const bit<2> REQUEST = 0x1;
-const bit<2> RESPONSE = 0x2;
+const bit<2>  REQUEST = 0x1;
+const bit<2>  RESPONSE = 0x2;
 const bit<16> REQREPVAL = 1234;
+const bit<32> NUMKEYS = 128;
 
 typedef bit<9>  egressSpec_t;
 typedef bit<48> macAddr_t;
@@ -149,13 +150,13 @@ control MyIngress(inout headers hdr,
         default_action = drop();
     }
 
-    action cache1_hit(bit<8> is_valid, bit<32> value) {
+    action cache_hit(bit<32> value) {
         bit<16> tmpPort; bit<48> tmpMAC; ip4Addr_t tmpAddr;
 
         // Use cached value
         hdr.response.setValid();
         hdr.response.rkey = hdr.request.rkey;
-        hdr.response.is_valid = is_valid;
+        hdr.response.is_valid = 1;
         hdr.response.value = value;
         hdr.request.setInvalid();
 
@@ -194,16 +195,38 @@ control MyIngress(inout headers hdr,
             hdr.request.rkey: exact;
         }
         actions = {
-            cache1_hit;
+            cache_hit;
         }
-        size = 128;
+        size = NUMKEYS;
     }
+
+    // Cache2 values: cached values from the server's responses
+    register<bit<32>>(NUMKEYS) cache2;
+    // Cache2 present bit: if the key's value is present in the cache
+    register<bit<1>>(NUMKEYS) cache2_present;
+    bit<32> cache2_val;
+    bit<1> cache2_present_val;
 
     apply {
         meta.ingress_metadata.cache_hit = 0;
 
-        if (hdr.request.isValid() && meta.parser_metadata.packet_type == REQUEST) {
+        // Update cache2
+        if (hdr.response.isValid() && meta.parser_metadata.packet_type == RESPONSE) {
+            cache2.write((bit<32>)hdr.response.rkey, hdr.response.value);
+            cache2_present.write((bit<32>)hdr.response.rkey, 1);
+        }
+        // Check cache1
+        else if (hdr.request.isValid() && meta.parser_metadata.packet_type == REQUEST) {
             cache1.apply();
+            // Check cache2 if cache1 miss
+            if (meta.ingress_metadata.cache_hit == 0) {
+                cache2_present.read(cache2_present_val, (bit<32>)hdr.request.rkey);
+                // Cache2 hit
+                if (cache2_present_val == 1) {
+                    cache2.read(cache2_val, (bit<32>)hdr.request.rkey);
+                    cache_hit(cache2_val);
+                }
+            }
         }
         if (meta.ingress_metadata.cache_hit == 0 && hdr.ipv4.isValid()) {
             ipv4_lpm.apply();

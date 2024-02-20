@@ -23,11 +23,10 @@ s.sendto(req, addr)
 res, addr2 = s.recvfrom(1024)
 
 key2, valid, value = resHdr.unpack(res)
-# print(key2, valid, value)
 
 assert key2 == key
 
 if valid:
-    print(value)
+    print(key2, valid, value)
 else:
     print("NOTFOUND")

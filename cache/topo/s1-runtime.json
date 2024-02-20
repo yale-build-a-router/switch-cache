@@ -34,33 +34,30 @@
     {
       "table": "MyIngress.cache1",
       "match": {
-        "hdr.request.rkey": 1
+        "hdr.request.rkey": 3
       },
-      "action_name": "MyIngress.cache1_hit",
+      "action_name": "MyIngress.cache_hit",
       "action_params": {
-        "is_valid": 11,
         "value": 123
       }
     },
     {
       "table": "MyIngress.cache1",
       "match": {
-        "hdr.request.rkey": 2
+        "hdr.request.rkey": 4
       },
-      "action_name": "MyIngress.cache1_hit",
+      "action_name": "MyIngress.cache_hit",
       "action_params": {
-        "is_valid": 11,
         "value": 345
       }
     },
     {
       "table": "MyIngress.cache1",
       "match": {
-        "hdr.request.rkey": 3
+        "hdr.request.rkey": 5
       },
-      "action_name": "MyIngress.cache1_hit",
+      "action_name": "MyIngress.cache_hit",
       "action_params": {
-        "is_valid": 11,
         "value": 678
       }
     }
